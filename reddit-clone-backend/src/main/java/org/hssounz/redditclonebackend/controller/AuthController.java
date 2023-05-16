@@ -1,6 +1,7 @@
 package org.hssounz.redditclonebackend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.hssounz.redditclonebackend.dto.LoginRequest;
 import org.hssounz.redditclonebackend.dto.RegisterRequest;
 import org.hssounz.redditclonebackend.exceptions.SpringRedditException;
 import org.hssounz.redditclonebackend.model.Response;
@@ -49,5 +50,10 @@ public class AuthController {
                             .build()
             );
         }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Response> login(@RequestBody LoginRequest loginRequest){
+        return authService.login(loginRequest);
     }
 }

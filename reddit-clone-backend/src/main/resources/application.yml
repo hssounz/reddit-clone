@@ -18,3 +18,11 @@ spring:
     username: 2f4b92181b4eb7
     password: 751e9d270b2950
     protocol: smtp
+    ### THIS IS STRICTLY FOR DEMO PURPOSE ONLY. ###
+jwt:
+  expiration:
+    time: 90000
+  public:
+    key: classpath:app.pub
+  private:
+    key: classpath:app.key
