@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public class Subreddit {
     @OneToMany(fetch = FetchType.LAZY)
     private List<Post> posts;
     @CreationTimestamp
-    private Instant createdAt;
+    private LocalDateTime createdAt;
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 

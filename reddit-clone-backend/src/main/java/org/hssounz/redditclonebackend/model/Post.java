@@ -8,6 +8,7 @@ import org.springframework.lang.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity @Data @SuperBuilder
@@ -21,7 +22,8 @@ public class Post {
     @Nullable @Lob
     private String description;
     @CreationTimestamp
-    private Integer voteCount;
+    private LocalDateTime voteCount;
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;
     private Instant createdAt;

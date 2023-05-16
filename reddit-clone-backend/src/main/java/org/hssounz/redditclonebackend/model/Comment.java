@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity @Data @SuperBuilder
@@ -19,7 +20,7 @@ public class Comment {
     @JoinColumn(name = "postId", referencedColumnName = "postId")
     private Post post;
     @CreationTimestamp
-    private Instant createdAt;
+    private LocalDateTime createdAt;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;

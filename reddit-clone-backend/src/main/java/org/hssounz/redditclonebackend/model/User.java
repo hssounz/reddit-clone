@@ -11,6 +11,7 @@ import javax.persistence.PrePersist;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -27,7 +28,7 @@ public class User {
     @Email @NotEmpty(message = "Email is required") @Column(unique = true)
     private String email;
     @CreationTimestamp
-    private Instant createdAt;
+    private LocalDateTime createdAt;
     private boolean enabled;
 
     @PrePersist
