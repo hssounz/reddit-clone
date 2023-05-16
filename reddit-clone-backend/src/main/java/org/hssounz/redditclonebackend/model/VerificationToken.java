@@ -1,13 +1,14 @@
 package org.hssounz.redditclonebackend.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Data
+@Data @NoArgsConstructor
 @SuperBuilder @Table(name = "token")
 public class VerificationToken {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

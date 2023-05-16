@@ -1,6 +1,8 @@
 package org.hssounz.redditclonebackend.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.lang.Nullable;
@@ -11,7 +13,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity @Data @SuperBuilder
+@Entity @Data @SuperBuilder @AllArgsConstructor @NoArgsConstructor
 public class Post {
     @Id
     private String postId;

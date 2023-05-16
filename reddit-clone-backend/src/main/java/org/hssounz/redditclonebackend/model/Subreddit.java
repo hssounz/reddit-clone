@@ -1,6 +1,8 @@
 package org.hssounz.redditclonebackend.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -12,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Data
+@Data @AllArgsConstructor @NoArgsConstructor
 @SuperBuilder
 public class Subreddit {
     @Id

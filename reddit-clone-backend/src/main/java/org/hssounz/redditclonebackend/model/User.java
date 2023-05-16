@@ -1,6 +1,8 @@
 package org.hssounz.redditclonebackend.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -15,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Data
+@Data @AllArgsConstructor @NoArgsConstructor
 @SuperBuilder
 public class User {
     @Id
@@ -25,7 +27,9 @@ public class User {
     private String username;
     @NotEmpty(message = "Password is required")
     private String password;
-    @Email @NotEmpty(message = "Email is required") @Column(unique = true)
+    @Email(message = "Please provide a valid address email")
+    @NotEmpty(message = "Email is required")
+    @Column(unique = true)
     private String email;
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -1,13 +1,15 @@
 package org.hssounz.redditclonebackend.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Data
+@Data @AllArgsConstructor @NoArgsConstructor
 @SuperBuilder
 public class Vote {
     @Id
