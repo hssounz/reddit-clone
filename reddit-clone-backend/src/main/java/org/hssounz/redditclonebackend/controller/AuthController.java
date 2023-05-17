@@ -23,8 +23,8 @@ public class AuthController {
         return ResponseEntity.ok(
                 Response.builder()
                         .message("User Registration Successful, Please check your email for verification")
-                        .status(HttpStatus.OK)
-                        .statusCode(HttpStatus.OK.value())
+                        .status(HttpStatus.CREATED)
+                        .statusCode(HttpStatus.CREATED.value())
                         .data(Map.of("user email: ", registerRequest.getEmail()))
                         .build()
         );
