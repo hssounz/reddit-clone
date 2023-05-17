@@ -22,7 +22,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -94,6 +93,13 @@ public class AuthServiceImpl implements AuthService {
                         )
                         .build()
         );
+    }
+
+    @Override @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public User getCurrentUser() {
+        return userRepository.findByUsername(
+                ((User)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername()
+        ).get();
     }
 
     private String generateVerificationToken(User user){

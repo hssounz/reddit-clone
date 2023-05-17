@@ -20,6 +20,7 @@ public class Subreddit {
     @Id
     private String id;
     @NotEmpty(message = "Community name is required")
+    @Column(unique = true)
     private String name;
     @NotEmpty(message = "Description is required")
     private String description;
