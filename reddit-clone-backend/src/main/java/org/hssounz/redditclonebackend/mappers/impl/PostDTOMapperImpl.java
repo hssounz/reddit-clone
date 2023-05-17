@@ -10,12 +10,14 @@ import org.hssounz.redditclonebackend.model.Post;
 import org.hssounz.redditclonebackend.model.User;
 import org.hssounz.redditclonebackend.repo.SubredditRepository;
 import org.hssounz.redditclonebackend.service.AuthService;
+import org.hssounz.redditclonebackend.service.CommentService;
 import org.springframework.stereotype.Service;
 
 @Service @RequiredArgsConstructor
 public class PostDTOMapperImpl implements PostDTOMapper {
 
     private final SubredditRepository subredditRepository;
+    private final CommentService commentService;
     private final AuthService authService;
 
     @Override
@@ -48,6 +50,7 @@ public class PostDTOMapperImpl implements PostDTOMapper {
                 .description(post.getDescription())
                 .subredditName(post.getSubreddit().getName())
                 .url(post.getUrl())
+                .comments(commentService.getPostComments(post.getPostId()))
                 .build();
     }
 }
