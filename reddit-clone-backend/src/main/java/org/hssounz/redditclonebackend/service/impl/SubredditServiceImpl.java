@@ -3,6 +3,8 @@ package org.hssounz.redditclonebackend.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.hssounz.redditclonebackend.dto.SubredditRequestDTO;
 import org.hssounz.redditclonebackend.dto.SubredditResponseDTO;
+import org.hssounz.redditclonebackend.exceptions.SpringRedditException;
+import org.hssounz.redditclonebackend.exceptions.SubredditNotFoundException;
 import org.hssounz.redditclonebackend.mappers.SubredditDTOMapper;
 import org.hssounz.redditclonebackend.repo.SubredditRepository;
 import org.hssounz.redditclonebackend.service.SubredditService;
@@ -31,5 +33,16 @@ public class SubredditServiceImpl implements SubredditService {
         return subredditRepository.findAll().stream().map(
                 subredditDTOMapper::fromSubreddit
         ).collect(Collectors.toList());
+    }
+
+    @Override
+    public SubredditResponseDTO get(String id) throws SpringRedditException {
+        return subredditDTOMapper.fromSubreddit(
+                subredditRepository.findById(id).orElseThrow(
+                        () -> new SpringRedditException(
+                                new SubredditNotFoundException(id)
+                        )
+                )
+        );
     }
 }

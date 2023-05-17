@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hssounz.redditclonebackend.dto.SubredditRequestDTO;
 import org.hssounz.redditclonebackend.dto.SubredditResponseDTO;
+import org.hssounz.redditclonebackend.exceptions.SpringRedditException;
 import org.hssounz.redditclonebackend.model.Response;
 import org.hssounz.redditclonebackend.service.SubredditService;
 import org.springframework.http.HttpStatus;
@@ -28,8 +29,7 @@ public class SubredditController {
                         .build()
         );
     }
-
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<Response> getAllSubreddits(){
         return ResponseEntity.ok(
                 Response.builder()
@@ -39,5 +39,28 @@ public class SubredditController {
                         .data(Map.of("subreddits", subredditService.getAll()))
                         .build()
         );
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<Response> getSubreddit(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .statusCode(HttpStatus.OK.value())
+                            .status(HttpStatus.OK)
+                            .message(String.format("Subreddit: %s retrieved", id))
+                            .data(Map.of("Subreddit", subredditService.get(id)))
+                            .build()
+            );
+        } catch (SpringRedditException e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .statusCode(HttpStatus.NOT_FOUND.value())
+                            .status(HttpStatus.NOT_FOUND)
+                            .message(e.getMessage())
+                            .developerMessage(e.toString())
+                            .build()
+            );
+        }
     }
 }
