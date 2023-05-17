@@ -6,6 +6,7 @@ import org.hssounz.redditclonebackend.dto.PostResponseDTO;
 import org.hssounz.redditclonebackend.exceptions.PostNotFoundException;
 import org.hssounz.redditclonebackend.exceptions.SpringRedditException;
 import org.hssounz.redditclonebackend.mappers.PostDTOMapper;
+import org.hssounz.redditclonebackend.model.Post;
 import org.hssounz.redditclonebackend.repo.PostRepository;
 import org.hssounz.redditclonebackend.service.PostService;
 import org.springframework.stereotype.Service;
@@ -20,11 +21,11 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     @Override @Transactional
     public PostResponseDTO save(PostRequestDTO postRequestDTO) throws SpringRedditException {
-        return postDTOMapper.fromPost(
-                postRepository.save(
-                        postDTOMapper.fromPostRequest(postRequestDTO)
-                )
+        Post post = postRepository.save(
+                postDTOMapper.fromPostRequest(postRequestDTO)
         );
+        post.getSubreddit().getPosts().add(post);
+        return postDTOMapper.fromPost(post);
     }
 
     @Override @Transactional(readOnly = true)

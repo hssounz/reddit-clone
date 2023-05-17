@@ -24,11 +24,11 @@ public class Post {
     @Nullable @Lob
     private String description;
     @CreationTimestamp
-    private LocalDateTime voteCount;
+    private LocalDateTime createdAt;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;
-    private Instant createdAt;
+    private Integer voteCount;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id", referencedColumnName = "id")
     private Subreddit subreddit;

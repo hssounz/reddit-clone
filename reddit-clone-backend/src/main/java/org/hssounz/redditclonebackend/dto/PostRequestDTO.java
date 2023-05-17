@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 public class PostRequestDTO {
     private String postName;
     private String description;
+    private String url;
     private String subredditName;
 }

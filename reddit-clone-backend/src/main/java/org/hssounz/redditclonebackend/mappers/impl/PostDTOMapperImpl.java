@@ -23,6 +23,7 @@ public class PostDTOMapperImpl implements PostDTOMapper {
         Post post = Post.builder()
                 .postName(postRequestDTO.getPostName())
                 .description(postRequestDTO.getDescription())
+                .url(postRequestDTO.getUrl())
                 .subreddit(
                         subredditRepository
                                 .findByName(postRequestDTO.getSubredditName())

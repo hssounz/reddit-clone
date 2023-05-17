@@ -97,9 +97,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public User getCurrentUser() {
-        return userRepository.findByUsername(
-                ((User)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername()
-        ).get();
+        return userRepository
+                .findByUsername(
+                        SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getName()
+                )
+                .get();
     }
 
     private String generateVerificationToken(User user){

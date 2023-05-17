@@ -21,8 +21,8 @@ public class PostController {
         try {
             return ResponseEntity.ok(
                     Response.builder()
-                            .statusCode(HttpStatus.OK.value())
-                            .status(HttpStatus.OK)
+                            .statusCode(HttpStatus.CREATED.value())
+                            .status(HttpStatus.CREATED)
                             .message("New post added successfully to subreddit: " + postRequestDTO.getSubredditName())
                             .data(Map.of("Post", postService.save(postRequestDTO)))
                             .build()
