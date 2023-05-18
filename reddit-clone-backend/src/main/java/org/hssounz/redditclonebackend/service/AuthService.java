@@ -15,5 +15,5 @@ public interface AuthService {
     public AuthenticationResponseDTO login(LoginRequest loginRequest);
     User getCurrentUser();
 
-    AuthenticationResponseDTO refreshToken(RefreshTokenRequest refreshTokenRequest);
+    AuthenticationResponseDTO refreshToken(RefreshTokenRequest refreshTokenRequest) throws SpringRedditException;
 }

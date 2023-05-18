@@ -8,6 +8,7 @@ import org.hssounz.redditclonebackend.exceptions.SpringRedditException;
 import org.hssounz.redditclonebackend.model.Response;
 import org.hssounz.redditclonebackend.model.User;
 import org.hssounz.redditclonebackend.service.AuthService;
+import org.hssounz.redditclonebackend.service.RefreshTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final RefreshTokenService refreshTokenService;
     @PostMapping("/signup")
     public ResponseEntity<Response> signup(@RequestBody RegisterRequest registerRequest) throws SpringRedditException {
         User user = authService.signup(registerRequest);
@@ -32,7 +34,6 @@ public class AuthController {
                         .build()
         );
     }
-
     @GetMapping("/accountVerification/{token}")
     public ResponseEntity<Response> verifyAccount(@PathVariable String token){
         try {
@@ -54,7 +55,6 @@ public class AuthController {
             );
         }
     }
-
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok(
@@ -73,13 +73,48 @@ public class AuthController {
     }
     @PostMapping("/refresh/token")
     public ResponseEntity<Response>refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest){
-        return ResponseEntity.ok(
-                Response.builder()
-                        .message("Token refreshed")
-                        .status(HttpStatus.OK)
-                        .statusCode(HttpStatus.OK.value())
-                        .data(Map.of("info", authService.refreshToken(refreshTokenRequest)))
-                        .build()
-        );
+        try {
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .message("Token refreshed")
+                            .status(HttpStatus.OK)
+                            .statusCode(HttpStatus.OK.value())
+                            .data(Map.of("info", authService.refreshToken(refreshTokenRequest)))
+                            .build()
+            );
+        } catch (SpringRedditException e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .message(e.getMessage())
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .developerMessage(e.toString())
+                            .build()
+            );
+        }
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<Response> logout(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest){
+        try {
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .message(refreshTokenRequest.getUsername() + "Logged out successfully")
+                            .status(HttpStatus.OK)
+                            .statusCode(HttpStatus.OK.value())
+                            .data(Map.of("id", refreshTokenService.deleteRefreshToken(refreshTokenRequest.getRefreshToken()), "deleted", true))
+                            .build()
+            );
+        } catch (SpringRedditException e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .message(e.getMessage())
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .developerMessage(e.toString())
+                            .build()
+            );
+        }
     }
 }

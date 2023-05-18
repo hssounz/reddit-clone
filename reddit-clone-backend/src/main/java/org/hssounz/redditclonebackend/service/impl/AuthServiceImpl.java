@@ -16,14 +16,16 @@ import org.hssounz.redditclonebackend.repo.VerificationTokenRepository;
 import org.hssounz.redditclonebackend.security.JwtProvider;
 import org.hssounz.redditclonebackend.service.AuthService;
 import org.hssounz.redditclonebackend.service.MailService;
+import org.hssounz.redditclonebackend.service.RefreshTokenService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -36,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final MailService mailService;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenService refreshTokenService;
     @Override @Transactional
     public User signup(RegisterRequest registerRequest) throws SpringRedditException {
         User user = User.builder()
@@ -69,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
         return user.getEmail();
     }
 
-    @Override
+    @Override @Transactional
     public AuthenticationResponseDTO login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -82,7 +85,7 @@ public class AuthServiceImpl implements AuthService {
         return AuthenticationResponseDTO.builder()
                 .accessToken(token)
                 .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
-                .refreshToken("")
+                .refreshToken(refreshTokenService.generateRefreshToken().getToken())
                 .username(loginRequest.getUsername())
                 .userId(
                         userRepository.findByUsername(loginRequest.getUsername()).get().getUserId()
@@ -90,7 +93,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    @Override @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Override @Transactional(readOnly = true)
     public User getCurrentUser() {
         return userRepository
                 .findByUsername(
@@ -101,10 +104,21 @@ public class AuthServiceImpl implements AuthService {
                 )
                 .get();
     }
-
-    @Override
-    public AuthenticationResponseDTO refreshToken(RefreshTokenRequest refreshTokenRequest) {
-        return null;
+    @Override @Transactional
+    public AuthenticationResponseDTO refreshToken(RefreshTokenRequest refreshTokenRequest) throws SpringRedditException {
+        refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
+        User user = userRepository.findByUsername(refreshTokenRequest.getUsername()).orElseThrow(
+                () -> new SpringRedditException(
+                        new UserNotFoundException(refreshTokenRequest.getUsername())
+                ));
+        return AuthenticationResponseDTO.builder()
+                .refreshToken(refreshTokenRequest.getRefreshToken())
+                .userId(user.getUserId())
+                .accessToken(jwtProvider.generateTokenWithUsername(user.getUsername()))
+                .username(refreshTokenRequest.getUsername())
+                .email(user.getEmail())
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .build();
     }
 
     private String generateVerificationToken(User user){

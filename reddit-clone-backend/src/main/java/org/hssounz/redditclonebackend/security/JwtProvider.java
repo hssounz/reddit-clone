@@ -20,19 +20,20 @@ public class JwtProvider {
 
     public String generateToken(Authentication authentication){
         User principal = (User) authentication.getPrincipal();
-        return generateTokenWithUsername(principal.getUsername(), jwtExpirationInMillis);
+        return generateTokenWithUsername(principal.getUsername());
     }
 
-    public String generateTokenWithUsername(String username, Long expiration){
+    public String generateTokenWithUsername(String username){
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusMillis(expiration))
+                .expiresAt(Instant.now().plusMillis(jwtExpirationInMillis))
                 .subject(username)
                 .claim("scope", "ROLE_USER")
                 .build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
+
 
     public Long getJwtExpirationInMillis(){
         return jwtExpirationInMillis;
