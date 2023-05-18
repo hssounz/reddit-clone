@@ -28,15 +28,12 @@ public class CommentServiceImpl implements CommentService {
                 .save(
                         commentDTOMapper.fromCommentRequest(commentRequestDTO)
                 );
-        String message = mailContentBuilder.build(
-                comment.getPost().getUser().getUsername() + "posted a comment on your post.",
-                "http://localhost:8088/api/posts/" + comment.getPost().getPostId()
-        );
         mailService.sendMail(
                 NotificationEmail.builder()
-                        .subject(comment.getUser().getUsername() + "Commented on your post.")
+                        .subject(comment.getUser().getUsername() + " Commented on your post.")
                         .recipient(comment.getPost().getUser().getEmail())
-                        .body(message)
+                        .body(comment.getPost().getUser().getUsername() + ", You have a new comment on your post. \n" +
+                                "comment posted by: "+ comment.getUser().getUsername())
                         .activationUrl("http://localhost:8088/api/posts/" + comment.getPost().getPostId())
                         .build()
         );
