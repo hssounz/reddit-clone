@@ -30,7 +30,6 @@ public class MailServiceImpl implements MailService {
             messageHelper.setSubject(notificationEmail.getSubject());
             messageHelper.setText(mailContentBuilder.build(notificationEmail.getBody(), notificationEmail.getActivationUrl()));
         };
-
         try {
             mailSender.send(messagePreparator);
             log.info("Activation mail sent to + " + notificationEmail.getRecipient());

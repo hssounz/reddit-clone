@@ -34,9 +34,10 @@ public class CommentServiceImpl implements CommentService {
         );
         mailService.sendMail(
                 NotificationEmail.builder()
-                        .subject(comment.getUser() + "Commented on your post.")
+                        .subject(comment.getUser().getUsername() + "Commented on your post.")
                         .recipient(comment.getPost().getUser().getEmail())
                         .body(message)
+                        .activationUrl("http://localhost:8088/api/posts/" + comment.getPost().getPostId())
                         .build()
         );
         return commentDTOMapper.fromComment(comment);
