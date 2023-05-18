@@ -20,14 +20,14 @@ public class JwtProvider {
 
     public String generateToken(Authentication authentication){
         User principal = (User) authentication.getPrincipal();
-        return generateTokenWithUsername(principal.getUsername());
+        return generateTokenWithUsername(principal.getUsername(), jwtExpirationInMillis);
     }
 
-    public String generateTokenWithUsername(String username){
+    public String generateTokenWithUsername(String username, Long expiration){
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusMillis(jwtExpirationInMillis))
+                .expiresAt(Instant.now().plusMillis(expiration))
                 .subject(username)
                 .claim("scope", "ROLE_USER")
                 .build();
@@ -39,9 +39,13 @@ public class JwtProvider {
     }
 
 
-    public boolean validateToken(String jwt) {
-        Jwt decode = this.jwtDecoder.decode(jwt);
-        return true;
+    public boolean validateToken(String jwt) throws Exception {
+        try {
+            Jwt decode = this.jwtDecoder.decode(jwt);
+            return true;
+        } catch (Exception e) {
+            throw new Exception(String.format("token %s is not valid", jwt));
+        }
     }
 
     public String getUsernameFromJwt(String jwt) {

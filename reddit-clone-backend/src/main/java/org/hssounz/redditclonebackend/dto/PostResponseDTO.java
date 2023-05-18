@@ -20,5 +20,7 @@ public class PostResponseDTO {
     private String description;
     private String url;
     private String subredditName;
+    private Integer voteCount;
     private List<CommentResponseDTO> comments;
+    private String timeAgo;
 }

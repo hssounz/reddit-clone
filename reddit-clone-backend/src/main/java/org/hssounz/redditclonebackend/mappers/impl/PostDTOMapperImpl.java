@@ -7,11 +7,16 @@ import org.hssounz.redditclonebackend.exceptions.SpringRedditException;
 import org.hssounz.redditclonebackend.exceptions.SubredditNotFoundException;
 import org.hssounz.redditclonebackend.mappers.PostDTOMapper;
 import org.hssounz.redditclonebackend.model.Post;
-import org.hssounz.redditclonebackend.model.User;
 import org.hssounz.redditclonebackend.repo.SubredditRepository;
 import org.hssounz.redditclonebackend.service.AuthService;
 import org.hssounz.redditclonebackend.service.CommentService;
+import org.ocpsoft.prettytime.PrettyTime;
 import org.springframework.stereotype.Service;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Date;
 
 @Service @RequiredArgsConstructor
 public class PostDTOMapperImpl implements PostDTOMapper {
@@ -22,7 +27,7 @@ public class PostDTOMapperImpl implements PostDTOMapper {
 
     @Override
     public Post fromPostRequest(PostRequestDTO postRequestDTO) throws SpringRedditException {
-        Post post = Post.builder()
+        return Post.builder()
                 .postName(postRequestDTO.getPostName())
                 .description(postRequestDTO.getDescription())
                 .url(postRequestDTO.getUrl())
@@ -39,11 +44,11 @@ public class PostDTOMapperImpl implements PostDTOMapper {
                         authService.getCurrentUser()
                 )
                 .build();
-        return post;
     }
 
     @Override
     public PostResponseDTO fromPost(Post post) {
+        PrettyTime prettyTime = new PrettyTime();
         return PostResponseDTO.builder()
                 .postId(post.getPostId())
                 .postName(post.getPostName())
@@ -51,6 +56,12 @@ public class PostDTOMapperImpl implements PostDTOMapper {
                 .subredditName(post.getSubreddit().getName())
                 .url(post.getUrl())
                 .comments(commentService.getPostComments(post.getPostId()))
+                .voteCount(post.getVoteCount())
+                .timeAgo(
+                        prettyTime.format(
+                                Date.from(post.getCreatedAt().toInstant(OffsetDateTime.now().getOffset()))
+                        )
+                )
                 .build();
     }
 }

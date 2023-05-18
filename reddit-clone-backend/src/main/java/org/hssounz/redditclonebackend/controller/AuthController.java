@@ -2,14 +2,17 @@ package org.hssounz.redditclonebackend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.hssounz.redditclonebackend.dto.LoginRequest;
+import org.hssounz.redditclonebackend.dto.RefreshTokenRequest;
 import org.hssounz.redditclonebackend.dto.RegisterRequest;
 import org.hssounz.redditclonebackend.exceptions.SpringRedditException;
 import org.hssounz.redditclonebackend.model.Response;
+import org.hssounz.redditclonebackend.model.User;
 import org.hssounz.redditclonebackend.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Map;
 
 @RestController
@@ -19,13 +22,13 @@ public class AuthController {
     private final AuthService authService;
     @PostMapping("/signup")
     public ResponseEntity<Response> signup(@RequestBody RegisterRequest registerRequest) throws SpringRedditException {
-        authService.signup(registerRequest);
+        User user = authService.signup(registerRequest);
         return ResponseEntity.ok(
                 Response.builder()
                         .message("User Registration Successful, Please check your email for verification")
                         .status(HttpStatus.CREATED)
                         .statusCode(HttpStatus.CREATED.value())
-                        .data(Map.of("user email: ", registerRequest.getEmail()))
+                        .data(Map.of("user email: ", registerRequest.getEmail(), "id", user.getUserId() ))
                         .build()
         );
     }
@@ -54,6 +57,29 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestBody LoginRequest loginRequest){
-        return authService.login(loginRequest);
+        return ResponseEntity.ok(
+                Response.builder()
+                        .message("User Logged in successfully")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .data(
+                                Map.of(
+                                        "User",
+                                        authService.login(loginRequest)
+                                )
+                        )
+                        .build()
+        );
+    }
+    @PostMapping("/refresh/token")
+    public ResponseEntity<Response>refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest){
+        return ResponseEntity.ok(
+                Response.builder()
+                        .message("Token refreshed")
+                        .status(HttpStatus.OK)
+                        .statusCode(HttpStatus.OK.value())
+                        .data(Map.of("info", authService.refreshToken(refreshTokenRequest)))
+                        .build()
+        );
     }
 }

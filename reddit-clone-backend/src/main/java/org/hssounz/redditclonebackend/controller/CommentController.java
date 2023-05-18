@@ -61,7 +61,7 @@ public class CommentController {
            );
        }
     }
-    @GetMapping("/{username}")
+    @GetMapping("/{username}/all")
     ResponseEntity<Response> getUserComments(@PathVariable String username) {
         try {
             return ResponseEntity.ok(

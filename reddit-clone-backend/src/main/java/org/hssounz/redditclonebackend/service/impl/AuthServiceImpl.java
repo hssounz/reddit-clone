@@ -2,12 +2,13 @@ package org.hssounz.redditclonebackend.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.hssounz.redditclonebackend.dto.LoginRequest;
+import org.hssounz.redditclonebackend.dto.RefreshTokenRequest;
 import org.hssounz.redditclonebackend.dto.RegisterRequest;
+import org.hssounz.redditclonebackend.dto.AuthenticationResponseDTO;
 import org.hssounz.redditclonebackend.exceptions.InvalidVerificationTokenException;
 import org.hssounz.redditclonebackend.exceptions.SpringRedditException;
 import org.hssounz.redditclonebackend.exceptions.UserNotFoundException;
 import org.hssounz.redditclonebackend.model.NotificationEmail;
-import org.hssounz.redditclonebackend.model.Response;
 import org.hssounz.redditclonebackend.model.User;
 import org.hssounz.redditclonebackend.model.VerificationToken;
 import org.hssounz.redditclonebackend.repo.UserRepository;
@@ -15,8 +16,6 @@ import org.hssounz.redditclonebackend.repo.VerificationTokenRepository;
 import org.hssounz.redditclonebackend.security.JwtProvider;
 import org.hssounz.redditclonebackend.service.AuthService;
 import org.hssounz.redditclonebackend.service.MailService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,7 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Map;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service @RequiredArgsConstructor
@@ -38,14 +37,13 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     @Override @Transactional
-    public void signup(RegisterRequest registerRequest) throws SpringRedditException {
+    public User signup(RegisterRequest registerRequest) throws SpringRedditException {
         User user = User.builder()
                 .username(registerRequest.getUsername())
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .enabled(false)
                 .build();
-        userRepository.save(user);
         String token = generateVerificationToken(user);
         mailService.sendMail(
                 NotificationEmail.builder()
@@ -56,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
                         .activationUrl("http://localhost:8088/api/auth/accountVerification/" + token)
                         .build()
         );
+        return userRepository.save(user);
     }
 
     @Override @Transactional
@@ -71,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ResponseEntity<Response> login(LoginRequest loginRequest) {
+    public AuthenticationResponseDTO login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
@@ -80,19 +79,15 @@ public class AuthServiceImpl implements AuthService {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtProvider.generateToken(authentication);
-        return ResponseEntity.ok(
-                Response.builder()
-                        .message("User Logged in successfully")
-                        .status(HttpStatus.OK)
-                        .statusCode(HttpStatus.OK.value())
-                        .data(
-                                Map.of(
-                                "username", ((org.springframework.security.core.userdetails.User)authentication.getPrincipal()).getUsername(),
-                                "token", token
-                                )
-                        )
-                        .build()
-        );
+        return AuthenticationResponseDTO.builder()
+                .accessToken(token)
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .refreshToken("")
+                .username(loginRequest.getUsername())
+                .userId(
+                        userRepository.findByUsername(loginRequest.getUsername()).get().getUserId()
+                )
+                .build();
     }
 
     @Override @org.springframework.transaction.annotation.Transactional(readOnly = true)
@@ -105,6 +100,11 @@ public class AuthServiceImpl implements AuthService {
                                 .getName()
                 )
                 .get();
+    }
+
+    @Override
+    public AuthenticationResponseDTO refreshToken(RefreshTokenRequest refreshTokenRequest) {
+        return null;
     }
 
     private String generateVerificationToken(User user){
