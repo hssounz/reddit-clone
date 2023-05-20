@@ -23,16 +23,29 @@ public class AuthController {
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
     @PostMapping("/signup")
-    public ResponseEntity<Response> signup(@RequestBody RegisterRequest registerRequest) throws SpringRedditException {
-        User user = authService.signup(registerRequest);
-        return ResponseEntity.ok(
-                Response.builder()
-                        .message("User Registration Successful, Please check your email for verification")
-                        .status(HttpStatus.CREATED)
-                        .statusCode(HttpStatus.CREATED.value())
-                        .data(Map.of("user email: ", registerRequest.getEmail(), "id", user.getUserId() ))
-                        .build()
-        );
+    public ResponseEntity<Response> signup(@RequestBody RegisterRequest registerRequest) {
+        try {
+            User user = authService.signup(registerRequest);
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .message("User Registration Successful, Please check your email for verification")
+                            .status(HttpStatus.CREATED)
+                            .statusCode(HttpStatus.CREATED.value())
+                            .data(Map.of("user email: ", registerRequest.getEmail(), "id", user.getUserId() ))
+                            .build()
+            );
+        } catch (SpringRedditException e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .message(e.getMessage())
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .developerMessage(e.toString())
+                            .build()
+            );
+        }
+
     }
     @GetMapping("/accountVerification/{token}")
     public ResponseEntity<Response> verifyAccount(@PathVariable String token){
