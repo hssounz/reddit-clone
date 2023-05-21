@@ -8,6 +8,7 @@ import org.hssounz.redditclonebackend.dto.AuthenticationResponseDTO;
 import org.hssounz.redditclonebackend.exceptions.InvalidVerificationTokenException;
 import org.hssounz.redditclonebackend.exceptions.SpringRedditException;
 import org.hssounz.redditclonebackend.exceptions.UserNotFoundException;
+import org.hssounz.redditclonebackend.exceptions.UsernameAlreadyTakenException;
 import org.hssounz.redditclonebackend.model.NotificationEmail;
 import org.hssounz.redditclonebackend.model.User;
 import org.hssounz.redditclonebackend.model.VerificationToken;
@@ -41,23 +42,29 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
     @Override @Transactional
     public User signup(RegisterRequest registerRequest) throws SpringRedditException {
-        User user = User.builder()
-                .username(registerRequest.getUsername())
-                .email(registerRequest.getEmail())
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .enabled(false)
-                .build();
-        String token = generateVerificationToken(user);
-        mailService.sendMail(
-                NotificationEmail.builder()
-                        .subject("Please Activate your reddit-clone account")
-                        .recipient(user.getEmail())
-                        .body("Thank you for signing up to Spring Reddit-Clone, \n" +
-                                "Please click on the below url to activate your account: \n")
-                        .activationUrl("http://localhost:8088/api/auth/accountVerification/" + token)
-                        .build()
-        );
-        return userRepository.save(user);
+        if (userRepository.findByUsername(registerRequest.getUsername()).isPresent()){
+            throw new SpringRedditException(
+                    new UsernameAlreadyTakenException(registerRequest.getUsername())
+            );
+        } else {
+            User user = User.builder()
+                    .username(registerRequest.getUsername())
+                    .email(registerRequest.getEmail())
+                    .password(passwordEncoder.encode(registerRequest.getPassword()))
+                    .enabled(false)
+                    .build();
+            String token = generateVerificationToken(user);
+            mailService.sendMail(
+                    NotificationEmail.builder()
+                            .subject("Please Activate your reddit-clone account")
+                            .recipient(user.getEmail())
+                            .body("Thank you for signing up to Spring Reddit-Clone, \n" +
+                                    "Please click on the below url to activate your account: \n")
+                            .activationUrl("http://localhost:8088/api/auth/accountVerification/" + token)
+                            .build()
+            );
+            return userRepository.save(user);
+        }
     }
 
     @Override @Transactional

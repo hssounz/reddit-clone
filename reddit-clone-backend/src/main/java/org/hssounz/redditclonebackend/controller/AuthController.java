@@ -31,7 +31,7 @@ public class AuthController {
                             .message("User Registration Successful, Please check your email for verification")
                             .status(HttpStatus.CREATED)
                             .statusCode(HttpStatus.CREATED.value())
-                            .data(Map.of("user email: ", registerRequest.getEmail(), "id", user.getUserId() ))
+                            .data(Map.of("email", registerRequest.getEmail(), "id", user.getUserId() ))
                             .build()
             );
         } catch (SpringRedditException e) {
