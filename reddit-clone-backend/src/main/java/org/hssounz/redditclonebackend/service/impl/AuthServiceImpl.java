@@ -21,6 +21,7 @@ import org.hssounz.redditclonebackend.service.RefreshTokenService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -80,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override @Transactional
-    public AuthenticationResponseDTO login(LoginRequest loginRequest) {
+    public AuthenticationResponseDTO login(LoginRequest loginRequest) throws AuthenticationException {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
@@ -89,6 +90,7 @@ public class AuthServiceImpl implements AuthService {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtProvider.generateToken(authentication);
+        System.out.println(token);
         return AuthenticationResponseDTO.builder()
                 .accessToken(token)
                 .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
@@ -97,6 +99,7 @@ public class AuthServiceImpl implements AuthService {
                 .userId(
                         userRepository.findByUsername(loginRequest.getUsername()).get().getUserId()
                 )
+                .email( userRepository.findByUsername(loginRequest.getUsername()).get().getEmail())
                 .build();
     }
 

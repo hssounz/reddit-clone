@@ -11,6 +11,7 @@ import org.hssounz.redditclonebackend.service.AuthService;
 import org.hssounz.redditclonebackend.service.RefreshTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -70,19 +71,31 @@ public class AuthController {
     }
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestBody LoginRequest loginRequest){
-        return ResponseEntity.ok(
-                Response.builder()
-                        .message("User Logged in successfully")
-                        .status(HttpStatus.OK)
-                        .statusCode(HttpStatus.OK.value())
-                        .data(
-                                Map.of(
-                                        "User",
-                                        authService.login(loginRequest)
-                                )
-                        )
-                        .build()
-        );
+     try {
+         return ResponseEntity.ok(
+                 Response.builder()
+                         .message("User Logged in successfully")
+                         .status(HttpStatus.OK)
+                         .statusCode(HttpStatus.OK.value())
+                         .data(
+                                 Map.of(
+                                         "User",
+                                         authService.login(loginRequest)
+                                 )
+                         )
+                         .build()
+         );
+     } catch (AuthenticationException e){
+         e.printStackTrace();
+         return ResponseEntity.ok(
+                 Response.builder()
+                         .message(e.getMessage())
+                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                         .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                         .developerMessage(e.toString())
+                         .build()
+         );
+     }
     }
     @PostMapping("/refresh/token")
     public ResponseEntity<Response>refreshToken(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest){
@@ -92,7 +105,7 @@ public class AuthController {
                             .message("Token refreshed")
                             .status(HttpStatus.OK)
                             .statusCode(HttpStatus.OK.value())
-                            .data(Map.of("info", authService.refreshToken(refreshTokenRequest)))
+                            .data(Map.of("User", authService.refreshToken(refreshTokenRequest)))
                             .build()
             );
         } catch (SpringRedditException e) {
